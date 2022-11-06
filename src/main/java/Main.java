@@ -1,21 +1,35 @@
 import Libraries.Basket;
 import Libraries.JsonConverter;
+import Libraries.Logger;
 import Libraries.TSVParser;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Main {
 
     protected static String tsvFile = "categories.tsv";
+    protected static String loggerFile = "data.bin";
 
     public static void main(String[] args) {
 
-        Basket basket = new Basket();
+
+        File logFile = new File(loggerFile);
+        Logger logger = new Logger();
+        Basket basket;
+        if (!logFile.exists()) {    //проверка на наличие файла data.bin
+            basket = new Basket();
+        } else {
+            try {
+                basket = Logger.loadFromBinFile(logFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
 
         try (ServerSocket serverSocket = new ServerSocket(8989);) { // стартуем сервер один(!) раз
             while (true) { // в цикле(!) принимаем подключения
@@ -36,6 +50,8 @@ public class Main {
                     String category = tsvRead.getCategory(title); //определение категории продукта после парсинга tsv
 
                     basket.addItem(category, sum);
+
+                    logger.saveBin(logFile, basket);
 //                    long returnSum = basket.returnSum(category);
 //                    System.out.println(category + " " + returnSum);
                     basket.sumCompare(); //определение максимальной траты
