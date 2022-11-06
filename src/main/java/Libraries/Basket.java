@@ -1,10 +1,11 @@
 package Libraries;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class Basket {
+public class Basket implements Serializable {
 
     protected Map<String, Long> basket = new HashMap<>();
     protected long maxSumLong;
